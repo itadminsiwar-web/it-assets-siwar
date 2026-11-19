@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>التقديم على وظيفة</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { background: var(--bg); }
+    .ap { max-width: 640px; margin: 0 auto; padding: 24px 16px 60px; }
+    .ap-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+    .ap-head img { height: 40px; }
+    .ap .panel { padding: 18px; }
+    .doc { border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+    .doc .txt { max-height: 140px; overflow: auto; background: var(--surface-2); border-radius: 8px; padding: 10px; font-size: 13px; color: var(--text-2); margin: 8px 0; }
+    .doc label { display: inline-flex; gap: 6px; margin-inline-end: 16px; font-weight: 600; }
+    .ok { text-align: center; padding: 30px 10px; } .ok b { font-size: 22px; display: block; margin: 8px 0; }
+  </style>
+</head>
+<body>
+  <div class="ap">
+    <div class="ap-head"><img id="apLogo" src="" alt=""><div><h1 id="apTitle">التقديم على وظيفة</h1><p class="sub muted" id="apSub">املا بياناتك وهنكلمك لتحديد ميعاد المقابلة</p></div></div>
+    <div id="apMain"></div>
+    <p class="muted small center">بياناتك بتتحفظ في سجل واحد ومش بتتشارك خارج الشركة. صلاحيات الوصول للمستندات الشخصية حسب الدور الوظيفي.</p>
+  </div>
+  <div id="toasts" aria-live="polite"></div>
+  <script src="js/brand.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/ledger.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/it-core.js"></script>
+  <script>document.getElementById('apLogo').src = BRAND.logo; document.getElementById('apLogo').alt = BRAND.company; document.title = 'التقديم على وظيفة · ' + BRAND.company;</script>
+  <script src="js/apply.js"></script>
+</body>
+</html>

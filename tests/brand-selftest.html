@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><link rel="stylesheet" href="../css/style.css"></head>
+<body><main id="main"></main><div id="toasts"></div><div id="print-area"></div><nav id="nav"></nav><pre id="out" style="direction:ltr"></pre>
+<script>
+  // اختبار تغيير الهوية: اسم الشركة الجديد يتطبق على الإعدادات والبيانات والمطبوعات
+  const mem = {}; Object.defineProperty(window, 'localStorage', { value: { getItem: k => mem[k] || null, setItem: (k, v) => { mem[k] = String(v); }, removeItem: k => { delete mem[k]; } } });
+</script>
+<script src="../js/brand.js"></script>
+<script>BRAND.company = 'شركة تجربة'; BRAND.companyEn = 'Test Co'; BRAND.logo = 'img/test.png'; window.APP = { id: 'it', home: 'itdash', pages: ['itdash'], nav: [] };</script>
+<script src="../js/config.js"></script><script src="../js/i18n.js"></script><script src="../js/core.js"></script><script src="../js/ledger.js"></script><script src="../js/ui.js"></script><script src="../js/auth.js"></script>
+<script src="../js/pages-it.js"></script><script src="../js/pages-it2.js"></script><script src="../js/it-core.js"></script><script src="../js/pages-it4.js"></script><script src="../js/pages-it5.js"></script>
+<script src="../js/platform.js"></script><script src="../js/demo.js"></script><script src="../js/demo-it3.js"></script>
+<script>
+  const out = [], ok = (c, m) => out.push((c ? 'ok   ' : 'FAIL ') + m);
+  try {
+    ok(Core.STORAGE_KEY === APP_CONFIG.storageKey && Core.STORAGE_KEY !== 'crm_finance_sa_v1', 'own storage key (' + Core.STORAGE_KEY + ')');
+    Store.load(); Store.replace(Demo.load()); applyBrand(DB); ITX.ensure(); Demo.seedIT3(DB); Store.save();
+    ok(DB.settings.companyName === 'شركة تجربة' && DB.settings.logo === 'img/test.png', 'settings use brand');
+    ok(DB.itSettings.companies[0].name === 'شركة تجربة', 'company filter uses brand');
+    ok(DB.team.every(m => !m.company || m.company === 'شركة تجربة'), 'employees under brand company');
+    let printed = ''; UI.print = h => { printed = h; }; ITX.printDoc(DB.itDocs.find(d => d.kind === 'unified'));
+    ok(printed.includes('شركة تجربة') && printed.includes('img/test.png'), 'printed acknowledgment shows new name + logo');
+    // تغيير الاسم بعد ما البيانات اتسجلت
+    BRAND.company = 'الاسم الجديد'; applyBrand(DB);
+    ok(DB.settings.companyName === 'الاسم الجديد' && DB.itSettings.companies[0].name === 'الاسم الجديد' && DB.assets.every(a => !a.company || a.company === 'الاسم الجديد'), 'rename migrates saved records');
+    ok(applyBrand(DB) === false, 'apply runs once per change');
+  } catch (e) { out.push('FAIL ' + e.message); }
+  out.push(out.some(x => x.startsWith('FAIL')) ? 'SOME FAILED' : 'ALL PASS');
+  document.getElementById('out').textContent = out.join('\n');
+</script></body></html>

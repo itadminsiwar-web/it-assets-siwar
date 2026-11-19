@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><link rel="stylesheet" href="../css/style.css"></head>
+<body><main id="main"></main><div id="toasts"></div><div id="print-area"></div><nav id="nav"></nav><pre id="out" style="direction:ltr"></pre>
+<script>
+  // أكواد Three Pillars (siwar / sakkbah) + المساعد
+  const mem = {}; Object.defineProperty(window, 'localStorage', { value: { getItem: k => mem[k] || null, setItem: (k, v) => { mem[k] = String(v); }, removeItem: k => { delete mem[k]; } } });
+  window.APP = { id: 'it', home: 'itdash', pages: ['itdash'], nav: [] };
+</script>
+<script src="../js/brand.js"></script><script src="../js/config.js"></script><script src="../js/i18n.js"></script><script src="../js/core.js"></script><script src="../js/ledger.js"></script><script src="../js/ui.js"></script><script src="../js/auth.js"></script>
+<script src="../js/pages-it.js"></script><script src="../js/pages-it2.js"></script><script src="../js/it-core.js"></script><script src="../js/pages-it4.js"></script><script src="../js/pages-it5.js"></script>
+<script src="../js/platform.js"></script><script src="../js/chatbot.js"></script><script src="../js/demo.js"></script><script src="../js/demo-it3.js"></script><script src="../js/tp-data.js"></script>
+<script>
+  const out = [], ok = (c, m) => out.push((c ? 'ok   ' : 'FAIL ') + m);
+  try {
+    Store.load(); Store.replace(Demo.load()); applyBrand(DB); ITX.ensure(); Demo.seedIT3(DB); TPData.apply(DB); Store.save();
+    const tag = c => DB.assets.find(a => a.tag === c);
+    ok(TPData.DEVICES.every(d => { const a = tag(d.code); return a && a.type === { CMP: 'desktop', LTP: 'laptop', Mobile: 'mobile' }[d.t] && a.company === (d.co === 'siwar' ? 'Siwar' : 'Sakkbah'); }), 'all 30 device codes exist with right type + company');
+    ok(new Set(DB.assets.map(a => a.tag)).size === DB.assets.length, 'no duplicate asset codes');
+    ok(DB.assets.every(a => /^(siwar|sakkbah)-[A-Za-z]+-\d{3}$/.test(a.tag)), 'every asset uses company-TYPE-NNN');
+    ok(TPData.SA_LINES.every(c => DB.lines.some(l => l.code === c && l.country === 'SA')), '7 Saudi numbers Siw-KSA-001..007');
+    ok(DB.lines.filter(l => l.country === 'EG').every(l => /^Siw-EGY-\d{3}$/.test(l.code)), 'Egyptian lines Siw-EGY-NNN');
+    ok(DB.mailboxes.length && DB.mailboxes.every(b => /^Siw-EML-\d{3}$/.test(b.code)) && new Set(DB.mailboxes.map(b => b.code)).size === DB.mailboxes.length, 'every email has a unique Siw-EML code');
+    const blob = JSON.stringify([DB.cycles, DB.itDocs]); ok(!/"(DEV|MOB|ACC)-\d{3,4}"|SIM-(SA|EG)-\d{3}/.test(blob), 'no old codes left in cycles / documents');
+    const omar = DB.team.find(m => m.name === 'عمر فاروق'), cy = DB.cycles.find(c => c.type === 'offboard' && c.empId === omar.id);
+    ok(cy.items.filter(i => i.key === 'recvAsset').every(i => (C2 = Core.find('assets', i.refId)) && C2.tag === i.ref), 'clearance items point to the new codes');
+    ok(DB.itSettings.companies.map(c => c.name).join() === 'Siwar,Sakkbah', 'companies Siwar + Sakkbah');
+    const maxN = t => Math.max(...DB.assets.filter(a => a.tag.split('-')[1] === t).map(a => +a.tag.split('-').pop()));
+    const exp = (co, t) => co + '-' + t + '-' + String(maxN(t) + 1).padStart(3, '0');
+    const e1 = exp('sakkbah', 'LTP'), g1 = ITX.assetCode('laptop', 'Sakkbah'), e2 = exp('siwar', 'CMP'), g2 = ITX.assetCode('desktop', 'Siwar');
+    ok(g1 === e1 && g2 === e2 && maxN('CMP') >= 16 && maxN('LTP') >= 9 && maxN('Mobile') >= 5, 'next codes continue after the highest (' + g1 + ', ' + g2 + ')');
+    ok(ITX.lineCode('SA') === 'Siw-KSA-008' && /^Siw-EML-\d{3}$/.test(ITX.mailCode()), 'next line + mail codes');
+    const r = ITX.importRows('assets', ITX.parseCSV('الكود,النوع,الماركة,الموديل,السيريال\nsakkbah-CMP-040,كمبيوتر مكتبي,HP,EliteDesk,SN-TP-1\nكود غلط,لابتوب,X,Y,Z'), 'الأجهزة');
+    ok(r.added === 1 && r.errors === 1 && DB.assets.some(a => a.tag === 'sakkbah-CMP-040') && ITX.assetCode('desktop', 'Sakkbah') === 'sakkbah-CMP-041', 'sheet import keeps lowercase code + bumps counter ' + JSON.stringify(r));
+    const r2 = ITX.importRows('lines', ITX.parseCSV('الكود,الرقم,شركة الاتصالات\nSiw-KSA-020,+966550000020,STC'), 'الشرائح'); ok(r2.added === 1 && DB.lines.find(l => l.code === 'Siw-KSA-020').country === 'SA', 'sheet import of Siw-KSA line');
+    // المساعد
+    const lap = DB.assets.find(a => a.tag.includes('-LTP-') && a.holderId);
+    const a1 = SEGBot.reply('مين معاه ' + lap.tag + '؟', 'it'); ok(a1.ok && a1.html.includes(Core.find('team', lap.holderId).name), 'bot: who has ' + lap.tag);
+    ok(SEGBot.reply('Siw-KSA-001', 'it').html.includes('Siw-KSA-001'), 'bot: line code lookup');
+    ok(SEGBot.reply(DB.mailboxes[0].code, 'it').html.includes(DB.mailboxes[0].address), 'bot: email code lookup');
+    ok(/خلال 7 أيام|مفيش تجديدات/.test(SEGBot.reply('التجديدات الأسبوع ده', 'it').html), 'bot: renewals this week');
+    ok(SEGBot.reply('الإخلاءات المفتوحة', 'it').html.includes('X'), 'bot: open clearances');
+    ok(SEGBot.reply('إزاي أسلّم جهاز؟', 'it').html.includes('تسليم'), 'bot: how-to');
+    ok(SEGBot.reply('مين معاه عمر فاروق', 'it').html.includes('عمر فاروق'), 'bot: custody by name');
+    SEGBot.mount({ name: 'مدير النظام', role: 'admin' }); const bt = document.querySelector('#segBot header b').textContent;
+    ok(bt.includes('Three Pillars') && !bt.includes('SEG'), 'bot title: ' + bt);
+  } catch (e) { out.push('FAIL ' + e.message + ' ' + (e.stack || '').split('\n')[1]); }
+  out.push(out.some(x => x.startsWith('FAIL')) ? 'SOME FAILED' : 'ALL PASS');
+  document.getElementById('out').textContent = out.join('\n');
+</script></body></html>

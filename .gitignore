@@ -1,0 +1,17 @@
+﻿# أسرار وبيانات دخول — مش بتترفع أبدًا
+extension/we-usage/config.js
+scripts/**/Secret.js
+scripts/google-sheet/Code.gs
+scripts/we-usage/config.json
+scripts/we-usage/profiles/
+scripts/we-usage/output/
+**/.clasp.json
+# ملفات بتتبني / مؤقتة
+desktop/dist/
+desktop/obj/
+__pycache__/
+*.pyc
+node_modules/
+.vscode/
+Thumbs.db
+desktop.ini

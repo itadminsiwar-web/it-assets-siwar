@@ -1,0 +1,9 @@
+{
+  "sheet_webapp_url": "https://script.google.com/macros/s/اكتب-هنا-رابط-الـ-Web-App/exec",
+  "sheet_secret": "نفس-الكلمة-السرية-اللي-في-Code.gs",
+  "lines": [
+    { "code": "NET-001", "name": "خط الفرع الرئيسي", "number": "0223456789", "password": "" },
+    { "code": "NET-002", "name": "خط المكتب الإداري", "number": "0225551234", "password": "" },
+    { "code": "NET-003", "name": "خط المخزن", "number": "0233334444", "password": "", "skip": false }
+  ]
+}

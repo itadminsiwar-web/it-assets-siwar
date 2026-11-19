@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "TP IT — تحديث باقات WE",
+  "version": "1.3.0",
+  "description": "زرار في صفحة باقات الإنترنت بنظام TP IT: يفتح my.te.eg، يعمل لوجين ويختار Internet، ويرجّع الجيجات المتبقية وميعاد التجديد.",
+  "permissions": ["storage", "tabs", "browsingData", "cookies"],
+  "host_permissions": [
+    "https://my.te.eg/*",
+    "https://*.te.eg/*",
+    "https://tp-it-assets.web.app/*",
+    "http://127.0.0.1/*",
+    "http://localhost/*",
+    "https://script.google.com/*",
+    "https://script.googleusercontent.com/*"
+  ],
+  "background": { "service_worker": "background.js" },
+  "action": { "default_popup": "popup.html", "default_title": "باقات WE — الأرقام والباسوردات" },
+  "content_scripts": [
+    { "matches": ["https://tp-it-assets.web.app/*", "http://127.0.0.1/*", "http://localhost/*"], "js": ["bridge.js"], "run_at": "document_start" },
+    { "matches": ["https://my.te.eg/*", "http://127.0.0.1/fake-we/*"], "js": ["we-hook.js"], "run_at": "document_start", "world": "MAIN" },
+    { "matches": ["https://my.te.eg/*", "http://127.0.0.1/fake-we/*"], "js": ["we-login.js"], "run_at": "document_idle" }
+  ]
+}

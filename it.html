@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>تكنولوجيا المعلومات</title>
+  <meta name="author" content="Eng. Mahmoud Ebrahim">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" type="image/png" href="img/mark.png">
+  <style>.tb-logo img { height: 42px; }</style>
+  <!-- هوية الشركة (الاسم واللوجو): js/brand.js -->
+  <script src="js/brand.js"></script>
+  <script>
+    // نظام تقنية المعلومات — نسخة مستقلة (تكنولوجيا المعلومات: الأصول والخدمات + رحلة الموظف)
+    document.title = BRAND.title + ' · ' + BRAND.company;
+    window.APP = {
+      id: 'it', home: 'itdash', label: BRAND.companyEn + ' · ' + BRAND.title,
+      sub: (BRAND.titleEn || BRAND.title).toUpperCase(), t1: 'تكنولوجيا', t2: 'المعلومات', tagline: BRAND.tagline,
+      hint: '',
+      pages: ['itdash', 'renewals', 'alerts', 'assets', 'asset', 'mobiles', 'consumables', 'maint', 'stocktake', 'lines', 'linesSA', 'linesEG', 'net', 'mail', 'tools', 'tool', 'subs', 'sub', 'domains',
+        'reqs', 'cands', 'cand', 'onboard', 'offboard', 'cycle', 'docs', 'staff', 'holder', 'moves', 'move', 'security', 'backup', 'vendors', 'cost', 'itlog', 'syncerr', 'itsettings',
+        'purchases', 'purchase', 'invoices', 'itexpenses', 'itbudgets', 'users', 'roles', 'orgs', 'reports', 'lists'],
+      // M01: ستة أقسام رئيسية بس — "الرئيسية" = الداشبورد لوحدها
+      nav: [
+        { group: 'الرئيسية', items: [['itdash', '🏠', 'Dashboard']] },
+        { group: 'الأصول والعهد', items: [['assets', '💻', 'الأجهزة'], ['mobiles', '📱', 'الموبايلات'], ['consumables', '🎧', 'المخازن والمستهلكات'], ['stocktake', '📋', 'الجرد والسيريالات'], ['maint', '🔧', 'الصيانة والضمان']] },
+        { group: 'رحلة الموظف', items: [['staff', '👥', 'الموظفون والأقسام'], ['reqs', '📋', 'طلبات الاحتياج'], ['cands', '🧑‍💼', 'التوظيف والمقابلات'], ['onboard', '🟢', 'التعيينات'], ['offboard', '🚪', 'إخلاء الطرف'], ['docs', '📄', 'المستندات والإقرارات']] },
+        { group: 'الخدمات التقنية', items: [['net', '🌐', 'الإنترنت والأرضي'], ['linesSA', '🇸🇦', 'الشرائح السعودية'], ['linesEG', '🇪🇬', 'الشرائح المصرية'], ['mail', '✉️', 'الإيميلات والحسابات'], ['tools', '🧩', 'التولات والتوكنات'], ['subs', '🪪', 'الاشتراكات والتراخيص'], ['domains', '🔐', 'الدومينات و SSL'], ['renewals', '🔁', 'مركز التجديدات'], ['alerts', '🔔', 'التنبيهات'], ['security', '🛡️', 'الأمان'], ['backup', '💾', 'النسخ الاحتياطي']] },
+        { group: 'الإدارة والمالية', items: [['vendors', '🏭', 'الموردون'], ['purchases', '🛒', 'طلبات الشراء'], ['invoices', '🧾', 'الاستلام والفواتير'], ['itexpenses', '💸', 'المصروفات والمدفوعات'], ['itbudgets', '📐', 'الميزانيات'], ['cost', '💰', 'التقارير المالية'], ['reports', '📊', 'مركز التقارير']] },
+        { group: 'إدارة النظام', items: [['users', '👤', 'المستخدمون'], ['roles', '🔑', 'الأدوار والصلاحيات'], ['orgs', '🏢', 'الشركات والفروع والأقسام'], ['lists', '📋', 'القوائم المنسدلة'],['itsettings', '🔌', 'الربط والأتمتة'], ['syncerr', '⚠️', 'أخطاء المزامنة'], ['itlog', '🕒', 'سجل النشاط والتدقيق']] },
+      ],
+    };
+  </script>
+</head>
+<body class="app-it">
+  <header class="topbar">
+    <button class="icon-btn menu" id="menuBtn" aria-label="القائمة">☰</button>
+    <div class="brand"><span class="tb-logo" id="tbLogo"></span> <span class="tb-name" id="tbName"></span></div>
+    <div class="gsearch"><input type="search" id="gsearch" placeholder="🔍 بحث: كود، سيريال، موظف، مرشح، مستند... (Ctrl+K)" aria-label="بحث في النظام"><div class="gresults" id="gresults" hidden></div></div>
+    <span class="spacer"></span>
+    <div class="app-switch-box" id="appSwitch" hidden></div>
+    <button class="lang-btn" id="langBtn" data-no-i18n title="Language / اللغة">English</button>
+    <button class="icon-btn" id="themeBtn" aria-label="تبديل الوضع الليلي" title="الوضع الليلي">◐</button>
+    <div class="user-box"><span id="userName"></span><button class="btn ghost sm" id="logoutBtn">خروج</button></div>
+  </header>
+  <aside class="sidebar"><nav class="nav" id="nav"></nav></aside>
+  <main id="main" tabindex="-1"></main>
+  <div id="toasts" aria-live="polite"></div>
+  <div id="print-area"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/protect.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/ledger.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/pages-it.js"></script>
+  <script src="js/pages-it2.js"></script>
+  <script src="js/vault.js"></script>
+  <script src="js/tp-form.js"></script>
+  <script src="js/vendor/qrcode.min.js"></script>
+  <script src="js/it-core.js"></script>
+  <script src="js/pages-it4.js"></script>
+  <script src="js/pages-it5.js"></script>
+  <script src="js/pages-it6.js"></script>
+  <script src="js/pages-it7.js"></script>
+  <script src="js/sheet-2way.js"></script>
+  <script src="js/sheet-links.js"></script>
+  <script src="js/tp-sheets.js"></script>
+  <script src="js/pages-it8.js"></script>
+  <script src="js/platform.js"></script>
+  <script src="js/chatbot.js"></script>
+  <script src="js/demo.js"></script>
+  <script src="js/demo-it3.js"></script>
+  <script src="js/tp-data.js"></script>
+  <script src="js/tp-staff.js"></script>
+  <script src="js/tp-clean.js"></script>
+  <script>
+    (function () {
+      const CFG = window.APP_CONFIG || {};
+      // الشريط العلوي من ملف الهوية
+      document.getElementById('tbLogo').innerHTML = `<img class="logo-on-light" src="${U.esc(BRAND.logo)}" alt="${U.esc(BRAND.company)}"><img class="logo-on-dark" src="${U.esc(BRAND.logoWhite || BRAND.logo)}" alt="${U.esc(BRAND.company)}">`;
+      document.getElementById('tbName').textContent = BRAND.nameNextToLogo ? BRAND.systemName : '';
+      // النسخة المستقلة: نظام واحد بس في قايمة الأنظمة والصلاحيات
+      UI.APPS.splice(0, UI.APPS.length, { id: 'it', href: 'it.html', ic: '🖥️', name: BRAND.systemName, roles: ['admin', 'it', 'hr', 'accountant', 'marketing'] });
+      Store.load();
+      if (window.TPClean) TPClean.apply(); // شيل البيانات الوهمية (مرة واحدة) + الحسابات التجريبية
+      if (CFG.autoDemo && !DB.customers.length && !DB.assets.length) Store.replace(Demo.load());
+      applyBrand(DB);
+      const demo = DB.customers.some(c => c.name === 'مقاهي بيت القهوة');
+      if (demo && !DB.itInit && !DB.assets.length && !DB.subscriptions.length) Demo.seedIT(DB);
+      if (demo && !DB.it2Init && !(DB.lines || []).length && !(DB.mailboxes || []).length) Demo.seedIT2(DB);
+      ITX.ensure();
+      if (demo && !DB.it3Init && !DB.cycles.length && !DB.tools.length) Demo.seedIT3(DB);
+      if (demo && window.TPData) TPData.apply(DB); // أكواد Three Pillars (مرة واحدة)
+      if (window.TPStaff) TPStaff.apply(DB);
+      if (window.TPSheets) TPSheets.purgeNets(); // خطوط مش بتاعتنا (0502365818) ← تتشال       // موظفين Three Pillars: الكود الوظيفي والإيميل
+      Store.save();
+      if (CFG.hosted) {
+        window.confirm = () => true;
+        window.prompt = (msg, def) => (def != null ? def : null);
+        const realPrint = UI.print.bind(UI); // المعاينة الأول، وزرار طباعة حقيقي (أو Save as PDF)
+        UI.print = html => UI.modal({ title: 'معاينة المستند', wide: true, body: `<div class="doc-preview">${html}</div>`,
+          extraButtons: '<button class="btn primary" data-realprint>🖨 طباعة / PDF</button>',
+          onOpen: m => { m.el.querySelector('[data-realprint]').onclick = () => { m.close(); realPrint(html); }; } });
+        UI.download = name => UI.toast('التنزيل غير متاح في نسخة العرض (' + name + ')', 'warn');
+        document.documentElement.classList.add('hosted');
+      }
+      try { const t = localStorage.getItem('it_assets_theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+      document.getElementById('themeBtn').onclick = () => {
+        const root = document.documentElement;
+        const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+        root.dataset.theme = dark ? 'light' : 'dark';
+        try { localStorage.setItem('it_assets_theme', root.dataset.theme); } catch (e) {}
+      };
+      I18N.init();
+      const lb = document.getElementById('langBtn'); lb.textContent = I18N.lang === 'en' ? 'العربية' : 'English'; lb.onclick = () => I18N.toggle();
+      const start = user => {
+        if (!UI.guard(user)) return;
+        ITX.filterNav(user); // الـ HR يشوف رحلة الموظف بس
+        UI.mountAppSwitch(user);
+        Platform.init(user); // الإشعارات
+        ITX.init(); // التنبيهات مرة واحدة لكل حدث + Sync Worker
+        document.getElementById('userName').textContent = user.name;
+        document.getElementById('logoutBtn').onclick = () => { if (confirm('تسجيل الخروج؟')) Auth.logout(); };
+        Router.buildNav();
+        UI.bindSearch(document.getElementById('gsearch'), document.getElementById('gresults'));
+        window.addEventListener('hashchange', Router.render);
+        document.getElementById('menuBtn').onclick = () => document.body.classList.toggle('nav-open');
+        Router.render();
+      };
+      const u = Auth.current();
+      if (u) start(u); else Auth.showLogin(start);
+    })();
+  </script>
+</body>
+</html>

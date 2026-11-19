@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><link rel="stylesheet" href="../css/style.css"></head>
+<body>
+<header class="topbar"><div class="app-switch-box" id="appSwitch" hidden></div></header><aside class="sidebar"><nav class="nav" id="nav"></nav></aside>
+<main id="main"></main><div id="toasts"></div><div id="print-area"></div><pre id="out" style="direction:ltr;white-space:pre-wrap"></pre>
+<script>
+  // اختبار نظام IT الجديد: الداشبورد النهائي + دورة الموظف 0–8 / X1–X9 + المزامنة والتنبيهات
+  window.__errs = []; window.onerror = (m, s, l) => { __errs.push(m + ' @' + s + ':' + l); };
+  const mem = {}; Object.defineProperty(window, 'localStorage', { value: { getItem: k => mem[k] || null, setItem: (k, v) => { mem[k] = String(v); }, removeItem: k => { delete mem[k]; } } });
+  window.APP = { id: 'it', home: 'itdash', label: 'IT', pages: ['itdash', 'renewals', 'alerts', 'assets', 'asset', 'mobiles', 'consumables', 'maint', 'stocktake', 'lines', 'linesSA', 'linesEG', 'net', 'mail', 'tools', 'tool', 'subs', 'sub', 'domains', 'reqs', 'cands', 'cand', 'onboard', 'offboard', 'cycle', 'docs', 'staff', 'holder', 'moves', 'move', 'security', 'backup', 'vendors', 'cost', 'itlog', 'syncerr', 'itsettings'],
+    nav: [{ group: 'الرئيسية', items: [['itdash', '🏠', 'نظرة عامة'], ['alerts', '🔔', 'التنبيهات'], ['renewals', '🔁', 'مركز التجديدات']] }, { group: 'الأصول', items: [['assets', '💻', 'الأجهزة']] }, { group: 'دورة الموظف', items: [['onboard', '🟢', 'التعيين'], ['offboard', '🚪', 'الإخلاء']] }] };
+</script>
+<script src="../js/i18n.js"></script><script src="../js/core.js"></script><script src="../js/ledger.js"></script>
+<script src="../js/ui.js"></script><script src="../js/auth.js"></script><script src="../js/pages-it.js"></script><script src="../js/pages-it2.js"></script>
+<script src="../js/vendor/qrcode.min.js"></script><script src="../js/it-core.js"></script><script src="../js/pages-it4.js"></script><script src="../js/pages-it5.js"></script>
+<script src="../js/platform.js"></script><script src="../js/demo.js"></script><script src="../js/demo-it3.js"></script>
+<script>
+  const C = Core, out = [], ok = (c, m) => out.push((c ? 'ok   ' : 'FAIL ') + m);
+  const q = new URLSearchParams(location.search), shot = q.get('shot');
+  Store.load(); Store.replace(Demo.load()); ITX.ensure(); Demo.seedIT3(DB); Store.save();
+  const omar = DB.team.find(m => m.name === 'عمر فاروق'), cyO = DB.cycles.find(c => c.type === 'offboard' && c.empId === omar.id);
+  const yas = DB.team.find(m => m.name === 'ياسمين فؤاد'), cyY = DB.cycles.find(c => c.type === 'onboard' && c.empId === yas.id);
+  const go = r => { location.hash = '#/' + r; Router.render(); return document.getElementById('main'); };
+  const modal = () => document.querySelector('.modal-wrap');
+  const save = () => { const m = modal(); m.querySelector('[data-save]').click(); };
+  const set = (name, v) => { const i = modal().querySelector('[name="' + name + '"]'); if (i.type === 'checkbox') i.checked = !!v; else i.value = v; };
+  const clickItem = (cy, key, idx) => { go('cycle/' + cy.id); const it = cy.items.filter(i => i.key === key)[idx || 0]; const b = document.querySelector('[data-do="' + it.id + '"]'); if (!b) throw new Error('no button for ' + key); b.click(); return it; };
+  if (shot) {
+    document.documentElement.dataset.theme = q.get('theme') || 'light';
+    Router.buildNav(); go(shot.replace('OMAR', cyO.id).replace('YAS', cyY.id).replace('CAND', (DB.candidates.find(c => c.status === 'docs') || {}).id));
+    if (q.get('ovf')) setTimeout(() => { const W = document.documentElement.clientWidth, bad = []; document.querySelectorAll('#main *').forEach(e => { const r = e.getBoundingClientRect(); if (r.width > W + 1 || r.left < -1) bad.push(e.tagName + '.' + e.className + ' w=' + Math.round(r.width) + ' l=' + Math.round(r.left)); }); document.getElementById('out').textContent = 'W=' + W + ' doc=' + document.documentElement.scrollWidth + '\n' + bad.slice(0, 25).join('\n'); }, 300);
+  } else (async () => {
+    try {
+      window.confirm = () => true; window.prompt = (m, d) => d || ''; let printed = ''; UI.print = h => { printed = h; };
+      const u = await Auth.login('it@example.com', 'It@12345', false); ok(u.role === 'it', 'IT login');
+      const h = await Auth.login('hr@example.com', 'Hr@12345', false); ok(h.role === 'hr', 'HR demo login');
+      await Auth.login('admin@example.com', 'Admin@123', false);
+      Router.buildNav();
+      // كل الصفحات
+      const routes = APP.pages.filter(p => !['asset', 'tool', 'sub', 'cand', 'cycle', 'holder', 'move'].includes(p)).concat(['asset/' + DB.assets[0].id, 'tool/' + DB.tools[0].id, 'sub/' + DB.subscriptions[0].id, 'cand/' + DB.candidates.find(c => c.status === 'docs').id, 'cycle/' + cyO.id, 'cycle/' + cyY.id, 'holder/' + omar.id, 'assets/' + encodeURIComponent('المبيعات')]);
+      routes.forEach(r => { const m = go(r); const b = m.innerHTML.includes('حدث خطأ') || /undefined|NaN|null<|>null|\[object|Infinity/.test(m.innerText); ok(!b && m.innerText.length > 60, 'route ' + r + (b ? ' :: ' + (m.innerText.match(/.{0,60}(حدث خطأ|undefined|NaN|null|\[object|Infinity).{0,60}/) || [''])[0] : '')); });
+      // الداشبورد: الأقسام المطلوبة من التصور النهائي
+      const dash = go('itdash').innerText;
+      ['نظرة عامة', 'آخر مزامنة مع Google Sheets', 'إجمالي الأجهزة', 'مستخدم', 'مخزن', 'خالي / جاهز للتسليم', 'في الصيانة', 'الأجهزة لكل قسم', 'التجديدات القادمة (30 يوم)', 'عرض الكالندر', 'التولات · المتبقي من التوكن', 'دورة الموظف: التعيين والإخلاء', 'التوظيف من التقديم للمباشرة', 'مباشرات قادمة · جاهزية IT', 'إخلاءات مفتوحة · المرحلة الحالية', 'باقات الإنترنت', 'الشرائح', 'الموبايلات على الأقسام', 'مراجعة السيريالات (الجرد)', 'سيكل التعيين والإخلاء', 'تجهيز IT قبل المباشرة (مرحلة 5)', 'حسابات شغالة لموظفين Exited', 'الأمان والباك أب', 'باك أب ناجح آخر 24 ساعة', 'الضمان والصيانة وعمر الأجهزة', 'وصلت لعمر الإحلال', 'التراخيص والدومينات وSSL', 'المستهلكات والتكلفة الشهرية', 'إجمالي المصروف المتكرر الشهري']
+        .forEach(s => ok(dash.includes(s), 'dashboard has: ' + s));
+      ok(/هيخلص بكرة/.test(dash) && /هيخلص قبل التجديد بـ 3 يوم/.test(dash) && /يكفي لحد التجديد/.test(dash), 'token forecast verdicts (بكرة / قبل التجديد بـ 3 / يكفي)');
+      ok(/8 جيجا متبقي/.test(dash), 'package 8 GB remaining shown');
+      ok(/جاهز/.test(dash) && /متأخر/.test(dash) && /جاري التجهيز/.test(dash), 'IT readiness states');
+      // فلتر القسم
+      ITX.setScope('dept', 'المبيعات'); go('itdash'); ok(/إجمالي الأجهزة\s*\n?\s*\d/.test(document.getElementById('main').innerText), 'dept filter renders'); ITX.setScope('dept', '');
+      // التنبيهات: مرة واحدة لكل حدث
+      const al = ITX.alerts(); ok(al.some(a => /باك أب سيرفر الملفات متأخر/.test(a.title) && a.sev === 'urgent'), 'backup late alert urgent');
+      ok(al.some(a => /الباقة وصلت 8 جيجا/.test(a.title)), 'package alert');
+      ok(al.some(a => /التوكن هيخلص بكرة/.test(a.title)), 'token alert');
+      const n1 = ITX.dispatchAlerts(), n2 = ITX.dispatchAlerts(); ok(n1 > 0 && n2 === 0, 'alerts sent once per event (' + n1 + ' then ' + n2 + ')');
+      // التجميد (X1)
+      let frozen = false; try { ITX.assertNotFrozen(omar.id); } catch (e) { frozen = /متجمدة/.test(e.message); } ok(frozen, 'X1 freezes new custody on employee');
+      const freeA = DB.assets.find(a => a.status === 'ready' && !a.reservedFor); Fin.assignAsset(freeA, omar.id); save(); ok(freeA.status === 'ready' && modal(), 'assigning to frozen employee rejected'); modal().remove();
+      // الإخلاء: X3 استلام كل العهد بالسيريال
+      ok(ITX.cycleStage(cyO) === 3, 'Omar at X3');
+      const lap = DB.assets.find(a => a.holderId === omar.id && a.type === 'laptop');
+      const recvs = cyO.items.filter(i => i.key === 'recvAsset');
+      let it = clickItem(cyO, 'recvAsset', recvs.indexOf(recvs.find(i => i.refId === lap.id))); set('sn', 'WRONG'); save(); ok(modal() && lap.holderId === omar.id, 'wrong serial rejected on return'); set('sn', lap.serial); save();
+      ok(lap.status === 'wipe' && !lap.holderId && lap.lastHolder === omar.id, 'laptop returned → مستني المسح');
+      cyO.items.filter(i => i.key === 'recvAsset' && !i.done).forEach(i => { const a = C.find('assets', i.refId); clickItem(cyO, 'recvAsset', recvs.indexOf(i)); set('sn', a.serial || ''); save(); });
+      clickItem(cyO, 'recvLine'); set('how', 'suspended'); save();
+      ok(ITX.custodyCount(omar.id).assets === 0, 'all Omar assets received');
+      clickItem(cyO, 'finance'); ok(!cyO.items.find(i => i.key === 'finance').done, 'finance blocked before return ack');
+      clickItem(cyO, 'accounts'); save(); ok(DB.mailboxes.filter(b => b.holderId === omar.id).every(b => b.status !== 'active' && !b.mfa), 'mail locked + MFA off');
+      clickItem(cyO, 'returnDoc'); modal().querySelector('[data-s]').click();
+      const ra = DB.itDocs.find(d => d.kind === 'returnAck' && d.cycleId === cyO.id); ok(ra && ra.status === 'signed' && ra.items.length >= 3, 'return ack generated + signed (' + (ra && ra.no) + ')');
+      ok(ITX.cycleStage(cyO) === 4, 'Omar moved to X4');
+      // X4: المسح + نقل التول
+      cyO.items.filter(i => i.key === 'wipe').forEach(i => { clickItem(cyO, 'wipe', cyO.items.filter(x => x.key === 'wipe').indexOf(i)); save(); });
+      ok(lap.status === 'ready' && lap.mdm === false && DB.itDocs.some(d => d.kind === 'wipeCert' && d.items[0].id === lap.id), 'wipe → خالي + wipe certificate');
+      const tool = DB.tools.find(t => (t.users || []).includes(omar.id)); clickItem(cyO, 'licenses'); set('to_' + tool.id, DB.team.find(m => m.name === 'ريم العتيبي').id); save();
+      ok(!tool.users.includes(omar.id) && tool.users.length === 1, 'tool account transferred');
+      ['exitDocs', 'exitInterview'].forEach(k => { clickItem(cyO, k); save(); });
+      clickItem(cyO, 'finance'); ok(cyO.items.find(i => i.key === 'finance').done, 'finance notified after return ack');
+      clickItem(cyO, 'archive'); ok(omar.status === 'exited' && omar.active === false, 'X8: EMP → Exited');
+      clickItem(cyO, 'position'); set('dec', 'replace'); save(); ok(DB.requisitions.some(r => r.replacesEmpId === omar.id), 'X9: REQ for replacement');
+      go('cycle/' + cyO.id); document.querySelector('[data-close]').click(); ok(cyO.status === 'closed', 'offboarding closed (Exited)');
+      ok(ITX.liveAccounts(omar.id).length === 0, 'no live accounts left for exited employee');
+      // التعيين: ياسمين من مرحلة 6 للنهاية
+      ok(ITX.cycleStage(cyY) === 6, 'Yasmin at stage 6 (IT ready)');
+      clickItem(cyY, 'handover'); ok(modal() == null || !cyY.items.find(i => i.key === 'handover').done, 'handover requires check-in first'); if (modal()) modal().remove();
+      clickItem(cyY, 'arrive'); clickItem(cyY, 'joinInfo'); save();
+      clickItem(cyY, 'handover'); const res = DB.assets.filter(a => a.reservedFor === yas.id); res.forEach(a => set('sn_' + a.id, a.serial)); save();
+      ok(res.every(a => a.status === 'assigned' && a.holderId === yas.id), 'reserved → assigned after serial match');
+      clickItem(cyY, 'review'); clickItem(cyY, 'ack'); ok(/Unified Employee Acknowledgment/.test(printed) && /IT Assets &amp; Accounts|IT Assets & Accounts/.test(printed) && /وافقت على/.test(printed), 'unified ack printed with 8 sections');
+      clickItem(cyY, 'sign'); const uni = DB.itDocs.find(d => d.kind === 'unified' && d.cycleId === cyY.id); ok(uni && uni.status === 'signed', 'unified signed');
+      ITX.setDocStatus(uni, 'archived', { scanName: 'scan.pdf' }); const sc = cyY.items.find(i => i.key === 'scan'); sc.done = true;
+      clickItem(cyY, 'activate'); ok(cyY.status === 'done' && yas.status === 'active' && DB.candidates.find(c => c.empId === yas.id).status === 'active', 'stage 8: Active Employee');
+      // ملحق عهدة بعد الإقرار
+      const extra = DB.assets.find(a => a.status === 'ready' && a.type !== 'mobile'); const nd = DB.itDocs.length; Fin.assignAsset(extra, yas.id); save();
+      ok(DB.itDocs.length === nd + 1 && DB.itDocs[DB.itDocs.length - 1].kind === 'annex', 'annex doc created for custody after unified ack');
+      // المرشح: تقييم وقرار
+      const cn = DB.candidates.find(c => c.status === 'interview'); go('cand/' + cn.id); document.querySelector('[data-ev]').click(); set('score', 4); save(); ok(cn.status === 'hrEval', 'HR evaluation recorded');
+      // المزامنة مع الشيت
+      const csv = 'الكود,النوع,الماركة,الموديل,السيريال,القسم,تاريخ الشراء\nDEV-0999,لابتوب,Dell,XPS,SN-NEW-999,المبيعات,01/02/2025\n,لابتوب,HP,X,SN-2,المبيعات,\nDEV-0999,لابتوب,Dell,XPS,SN-3,المبيعات,\nDEV-0998,لابتوب,HP,Y,SN-4,قسم وهمي,\nDEV-0997,لابتوب,HP,Z,SN-5,المبيعات,32/13/2025';
+      const r1 = ITX.importRows('assets', ITX.parseCSV(csv), 'الأجهزة'); ok(r1.added === 1 && r1.errors === 4, 'sheet import: 1 added, 4 errors (' + JSON.stringify(r1) + ')');
+      const na = DB.assets.find(a => a.tag === 'DEV-0999'); ok(na && na.status === 'stock' && na.purchaseDate === '2025-02-01', 'imported row: stock + date normalized');
+      na.status = 'assigned'; na.holderId = yas.id; ITX.importRows('assets', ITX.parseCSV('الكود,الموديل\nDEV-0999,XPS 13'), 'الأجهزة'); ok(na.status === 'assigned' && na.holderId === yas.id && na.model === 'XPS 13', 'sync never overwrites status/holder');
+      ok(DB.syncErrors.filter(e => e.sheet === 'الأجهزة' && e.status !== 'fixed').length === 0, 'old sheet errors auto-closed after clean sync');
+      // قوالب المواقع المدفوعة والدومينات والباقات + قراءات سكريبت WE
+      const rs = ITX.importRows('subscriptions', ITX.parseCSV('الكود,الاسم,الفئة,الباقة,المورد,الرابط,حساب الدخول,المقاعد,الدورة,التكلفة,العملة,التجديد\nLIC-101,Canva Pro,مواقع ومنصات مدفوعة,Teams,Canva,https://www.canva.com,admin@company.com,5,سنوي,300,USD,2027-03-01'), 'التراخيص');
+      const cs = DB.subscriptions.find(s => s.code === 'LIC-101'); ok(rs.added === 1 && cs.url === 'https://www.canva.com' && cs.cycle === 'yearly' && cs.vendor === 'Canva' && cs.seats === 5 && cs.status === 'active', 'paid-sites template imports (url, yearly, vendor)');
+      ITX.importRows('domains', ITX.parseCSV('الكود,الاسم,الصنف,المورد,الانتهاء,التكلفة,العملة\nDOM-101,company.com,SSL,Sectigo,2027-01-10,280,SAR\nDOM-103,استضافة الموقع,هوستنج,Hostinger,2027-02-01,3500,EGP'), 'الدومينات');
+      ok(DB.domains.find(x => x.code === 'DOM-101').kind === 'ssl' && DB.domains.find(x => x.code === 'DOM-103').kind === 'hosting' && DB.domains.find(x => x.code === 'DOM-101').registrar === 'Sectigo', 'domains template: Arabic kinds mapped');
+      ITX.importRows('netPackages', ITX.parseCSV('الكود,الاسم,الحصة,التجديد,التكلفة,العملة,الفرع,المورد\nNET-101,خط تجربة,200,2026-12-01,2500,,المخزن,WE'), 'الباقات');
+      const np = DB.netPackages.find(x => x.code === 'NET-101'); ok(np && np.currency === 'EGP' && np.provider === 'WE' && np.quota === 200, 'package template: EGP + provider');
+      const td = U.today(), uc = 'الكود,التاريخ,المستخدم,المتبقي,الحصة,التجديد,المصدر\n';
+      ITX.importRows('usage', ITX.parseCSV(uc + 'NET-101,' + td + ',,50,200,2026-12-20,my.te.eg'), 'الاستهلاك');
+      ok(ITX.forecast('net', np).remaining === 50 && np.renewalDate === '2026-12-20', 'WE reading: remaining + renewal date applied');
+      const nS = DB.usageSnapshots.filter(s => s.refId === np.id).length; const ru = ITX.importRows('usage', ITX.parseCSV(uc + 'NET-101,' + td + ',,40,200,2026-12-20,my.te.eg'), 'الاستهلاك');
+      ok(ru.updated === 1 && DB.usageSnapshots.filter(s => s.refId === np.id).length === nS && ITX.forecast('net', np).remaining === 40, 'second reading same day updates (no duplicate)');
+      go('net'); ok(/ج\.م/.test(document.getElementById('main').innerText) && !/SAR/.test(document.getElementById('main').innerText), 'packages page in EGP');
+      // الجرد
+      go('stocktake'); ok(/الجرد والسيريالات/.test(document.getElementById('main').innerText), 'stocktake page');
+      const ss = ITX.stocktakeStats(); ok(ss.pct >= 70 && ss.pct <= 75 && ss.mismatch >= 1, 'stocktake stats ' + JSON.stringify(ss));
+      // الصلاحيات
+      const nav = JSON.parse(JSON.stringify(APP.nav)); ITX.filterNav({ role: 'hr' }); ok(APP.nav.every(g => ['الرئيسية', 'دورة الموظف'].includes(g.group)) && !APP.pages.includes('cost'), 'HR sees employee cycle only');
+      ok(UI.APPS.find(a => a.id === 'it').roles.includes('hr'), 'HR allowed in IT app');
+      ok(__errs.length === 0, 'no JS errors ' + __errs.join(' | '));
+    } catch (e) { out.push('FAIL exception ' + e.message + ' ' + (e.stack || '').split('\n')[1]); }
+    out.push(out.filter(x => x.startsWith('FAIL')).length ? 'SOME FAILED' : 'ALL PASS');
+    document.getElementById('out').textContent = out.join('\n');
+  })();
+</script>
+</body></html>

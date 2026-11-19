@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>باقات WE</title>
+<style>
+  body { font: 14px 'Segoe UI', Tahoma, sans-serif; width: 340px; margin: 0; padding: 14px; color: #1d1d1b; background: #fff; }
+  h1 { font-size: 16px; margin: 0 0 4px; color: #c94f08; }
+  p { margin: 4px 0 10px; color: #555; font-size: 12px; }
+  .line { border: 1px solid #ddd; border-radius: 8px; padding: 8px; margin-bottom: 8px; }
+  .line b { direction: ltr; display: inline-block; }
+  label { display: block; font-size: 12px; color: #444; margin-top: 6px; }
+  select { width: 100%; box-sizing: border-box; padding: 6px 8px; border: 1px solid #ccc; border-radius: 6px; font: inherit; direction: ltr; }
+  input { width: 100%; box-sizing: border-box; padding: 6px 8px; border: 1px solid #ccc; border-radius: 6px; font: inherit; direction: ltr; }
+  button { margin-top: 10px; width: 100%; padding: 8px; border: 0; border-radius: 8px; background: #c94f08; color: #fff; font: 600 14px inherit; cursor: pointer; }
+  button.ghost { background: #fff; color: #c94f08; border: 1px dashed #c94f08; }
+  .del { color: #b91c1c; font-size: 12px; cursor: pointer; }
+  .ok { color: #0f766e; font-size: 12px; text-align: center; min-height: 16px; margin-top: 6px; }
+</style>
+</head>
+<body>
+  <h1>🔄 تحديث باقات WE</h1>
+  <p>اليوزر (رقم الخط) والباسورد لكل خط — بيتحفظوا على الجهاز ده بس، والإضافة بتكتبهم في موقع WE لما تدوس "حدّث كل الخطوط من WE" في صفحة الباقات. الباسورد لو فاضي هتكتبه إنت.</p>
+  <div id="lines"></div>
+  <button id="add" class="ghost">+ خط (يوزر) جديد</button>
+  <button id="save">حفظ</button>
+  <div class="ok" id="msg"></div>
+  <script src="config.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
